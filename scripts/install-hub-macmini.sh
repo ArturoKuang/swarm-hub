@@ -92,7 +92,8 @@ HUB_URL="http://${TS_IP:-$(hostname)}:${SWARM_HUB_PORT}"
 
 if (( LOAD )); then
   launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
-  launchctl bootstrap "gui/$(id -u)" "$PLIST"
+  sleep 1
+  launchctl bootstrap "gui/$(id -u)" "$PLIST" || (sleep 2 && launchctl bootstrap "gui/$(id -u)" "$PLIST")
   for _ in {1..20}; do curl -fsS "http://127.0.0.1:${SWARM_HUB_PORT}/health" >/dev/null 2>&1 && break; sleep 0.5; done
   curl -fsS "http://127.0.0.1:${SWARM_HUB_PORT}/health" >/dev/null && echo "hub is up: $HUB_URL" || { echo "hub did not come up; see $LOG_DIR/hub.log" >&2; exit 1; }
 else
